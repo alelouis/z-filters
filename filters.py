@@ -4,11 +4,31 @@ from sympy.abc import x
 import sympy
 
 
+def compute_h_s(a, b, s):
+    """
+    Computes complex transfer function on s
+    :param a: denominator coefficients e.g. (b_0 * s**2 + b_1 * s + b_2)
+    :param b: numerator coefficients e.g. (b_0 * s**2 + b_1 * s + b_2)
+    :param s: np.array of input s
+    :return: num/den transfer function
+    """
+    num = np.zeros_like(s, dtype=np.complex128)
+    den = np.zeros_like(s, dtype=np.complex128)
+
+    for n, b_i in enumerate(np.flip(b)):
+        num += b_i * s ** n
+
+    for n, a_i in enumerate(np.flip(a)):
+        den += a_i * s ** n
+
+    return num / den
+
+
 def compute_h_z(a, b, z):
     """
     Computes complex transfer function on z
-    :param a: denominator coefficients
-    :param b: numerator coefficients
+    :param a: denominator coefficients e.g. (b_0 + b_1 * z**(-1) + b_2 * z**(-2))
+    :param b: numerator coefficients e.g. (b_0 + b_1 * z**(-1) + b_2 * z**(-2))
     :param z: np.array of input z
     :return: num/den transfer function
     """
@@ -22,6 +42,20 @@ def compute_h_z(a, b, z):
         den += a_i * z ** (-n)
 
     return num / den
+
+
+def analog_to_digital(b, a, z, w0):
+    """
+    Compute h_z from analog s coefficients via bilinear transform
+    c.f. https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html
+    :param a: denominator coefficients e.g. (b_0 * s**2 + b_1 * s + b_2)
+    :param b: numerator coefficients e.g. (b_0 * s**2 + b_1 * s + b_2)
+    :param z: z: np.array of input z
+    :param w0: cycle frequency to map
+    :return: num/den digital transfer function
+    """
+    s = (1/np.tan(w0/2)) * (1-z**(-1))/(1+z**(-1))
+    return compute_h_s(a, b, s)
 
 
 def compute_b_a(zeros, poles):
