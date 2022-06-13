@@ -10,8 +10,8 @@ class Equalizer:
         :param Q: Quality factor
         :param bands: number of bands for EQ
         """
-        self.Q = 2
-        self.bands = 8
+        self.Q = Q
+        self.bands = bands
 
         step = np.pi / (bands + 1)
         self.gains_db = np.ones(bands)
